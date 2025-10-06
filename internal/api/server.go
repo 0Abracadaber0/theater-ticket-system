@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"strconv"
 	"theater-ticket-system/internal/config"
+	"theater-ticket-system/internal/database/postgres"
 )
 
 type Server struct {
@@ -28,6 +29,8 @@ func (s *Server) setupRoutes() {
 		api.GET("/health-check", func(c *gin.Context) {
 			c.JSON(200, gin.H{"status": "ok"})
 		})
+
+		_ = postgres.Init(s.cfg)
 
 		api.GET("/plays", func(c *gin.Context) {
 			c.JSON(200, gin.H{
