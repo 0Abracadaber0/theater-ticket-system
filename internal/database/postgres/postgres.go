@@ -43,13 +43,13 @@ func Migrate() error {
 	log.Println("Running migrations...")
 
 	err := DB.AutoMigrate(
-		&models.User{},
-		&models.Play{},
-		&models.Hall{},
-		&models.Seat{},
-		&models.Performance{},
-		&models.PerformanceSeat{},
-		&models.Booking{},
+		&model.User{},
+		&model.Play{},
+		&model.Hall{},
+		&model.Seat{},
+		&model.Performance{},
+		&model.PerformanceSeat{},
+		&model.Booking{},
 	)
 
 	if err != nil {
@@ -64,13 +64,13 @@ func Seed() error {
 	log.Println("Seeding database...")
 
 	var count int64
-	DB.Model(&models.Play{}).Count(&count)
+	DB.Model(&model.Play{}).Count(&count)
 	if count > 0 {
 		log.Println("Database already seeded, skipping...")
 		return nil
 	}
 
-	hall := models.Hall{
+	hall := model.Hall{
 		ID:       uuid.New(),
 		Name:     "Большой зал",
 		Capacity: 200,
@@ -86,7 +86,7 @@ func Seed() error {
 				category = "balcony"
 			}
 
-			seat := models.Seat{
+			seat := model.Seat{
 				ID:       uuid.New(),
 				HallID:   hall.ID,
 				Row:      row,
@@ -99,7 +99,7 @@ func Seed() error {
 		}
 	}
 
-	plays := []models.Play{
+	plays := []model.Play{
 		{
 			ID:          uuid.New(),
 			Title:       "Вишневый сад",
@@ -135,7 +135,7 @@ func Seed() error {
 		}
 
 		for i := 1; i <= 5; i++ {
-			performance := models.Performance{
+			performance := model.Performance{
 				ID:     uuid.New(),
 				PlayID: play.ID,
 				HallID: hall.ID,
@@ -146,7 +146,7 @@ func Seed() error {
 				return err
 			}
 
-			var seats []models.Seat
+			var seats []model.Seat
 			DB.Where("hall_id = ?", hall.ID).Find(&seats)
 
 			for _, seat := range seats {
@@ -157,7 +157,7 @@ func Seed() error {
 					price = 1000
 				}
 
-				perfSeat := models.PerformanceSeat{
+				perfSeat := model.PerformanceSeat{
 					ID:            uuid.New(),
 					PerformanceID: performance.ID,
 					SeatID:        seat.ID,

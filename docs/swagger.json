@@ -1,0 +1,271 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/api/plays": {
+            "get": {
+                "description": "Get list of all plays",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plays"
+                ],
+                "summary": "Get all plays",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/theater-ticket-system_internal_models_responses.Play"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new play",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plays"
+                ],
+                "summary": "Create new play",
+                "parameters": [
+                    {
+                        "description": "Play object",
+                        "name": "play",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/theater-ticket-system_internal_models_requests.Play"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/theater-ticket-system_internal_models_responses.Play"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/plays/{id}": {
+            "get": {
+                "description": "Get detailed information about a play",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plays"
+                ],
+                "summary": "Get play by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Play ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/theater-ticket-system_internal_models_responses.Play"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an existing play",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plays"
+                ],
+                "summary": "Update play",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Play ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Play object",
+                        "name": "play",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/theater-ticket-system_internal_models_requests.Play"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/theater-ticket-system_internal_models_responses.Play"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a play",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plays"
+                ],
+                "summary": "Delete play",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Play ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "theater-ticket-system_internal_models_requests.Play": {
+            "type": "object",
+            "required": [
+                "author",
+                "description",
+                "duration",
+                "genre",
+                "poster_url",
+                "title"
+            ],
+            "properties": {
+                "author": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "duration": {
+                    "type": "integer"
+                },
+                "genre": {
+                    "type": "string"
+                },
+                "poster_url": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "theater-ticket-system_internal_models_responses.Performance": {
+            "type": "object",
+            "required": [
+                "created_at",
+                "date",
+                "id",
+                "updated_at"
+            ],
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "play": {
+                    "$ref": "#/definitions/theater-ticket-system_internal_models_responses.Play"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "scheduled",
+                        "completed",
+                        "cancelled"
+                    ]
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "theater-ticket-system_internal_models_responses.Play": {
+            "type": "object",
+            "required": [
+                "author",
+                "created_at",
+                "description",
+                "duration",
+                "genre",
+                "id",
+                "poster_url",
+                "title",
+                "updated_at"
+            ],
+            "properties": {
+                "author": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "duration": {
+                    "type": "integer"
+                },
+                "genre": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "performances": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/theater-ticket-system_internal_models_responses.Performance"
+                    }
+                },
+                "poster_url": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

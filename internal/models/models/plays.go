@@ -1,7 +1,8 @@
-package models
+package model
 
 import (
 	"github.com/google/uuid"
+	response "theater-ticket-system/internal/models/responses"
 	"time"
 
 	"gorm.io/gorm"
@@ -24,6 +25,27 @@ type Play struct {
 	Performances []Performance `gorm:"foreignKey:PlayID"`
 }
 
-func (Play) TableName() string {
+func (*Play) TableName() string {
 	return "plays"
+}
+
+func (p *Play) Response() response.Play {
+	performances := make([]response.Performance, len(p.Performances))
+	for i := range p.Performances {
+		performances[i] = p.Performances[i].Response()
+	}
+
+	return response.Play{
+		ID:          p.ID,
+		Title:       p.Title,
+		Author:      p.Author,
+		Description: p.Description,
+		Duration:    p.Duration,
+		PosterURL:   p.PosterURL,
+		Genre:       p.Genre,
+		CreatedAt:   p.CreatedAt,
+		UpdatedAt:   p.UpdatedAt,
+
+		Performances: performances,
+	}
 }

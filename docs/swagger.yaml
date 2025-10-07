@@ -1,0 +1,183 @@
+definitions:
+  theater-ticket-system_internal_models_requests.Play:
+    properties:
+      author:
+        type: string
+      description:
+        type: string
+      duration:
+        type: integer
+      genre:
+        type: string
+      poster_url:
+        type: string
+      title:
+        type: string
+    required:
+    - author
+    - description
+    - duration
+    - genre
+    - poster_url
+    - title
+    type: object
+  theater-ticket-system_internal_models_responses.Performance:
+    properties:
+      created_at:
+        type: string
+      date:
+        type: string
+      id:
+        type: string
+      play:
+        $ref: '#/definitions/theater-ticket-system_internal_models_responses.Play'
+      status:
+        enum:
+        - scheduled
+        - completed
+        - cancelled
+        type: string
+      updated_at:
+        type: string
+    required:
+    - created_at
+    - date
+    - id
+    - updated_at
+    type: object
+  theater-ticket-system_internal_models_responses.Play:
+    properties:
+      author:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      duration:
+        type: integer
+      genre:
+        type: string
+      id:
+        type: string
+      performances:
+        items:
+          $ref: '#/definitions/theater-ticket-system_internal_models_responses.Performance'
+        type: array
+      poster_url:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    required:
+    - author
+    - created_at
+    - description
+    - duration
+    - genre
+    - id
+    - poster_url
+    - title
+    - updated_at
+    type: object
+info:
+  contact: {}
+paths:
+  /api/plays:
+    get:
+      description: Get list of all plays
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/theater-ticket-system_internal_models_responses.Play'
+            type: array
+      summary: Get all plays
+      tags:
+      - plays
+    post:
+      consumes:
+      - application/json
+      description: Create a new play
+      parameters:
+      - description: Play object
+        in: body
+        name: play
+        required: true
+        schema:
+          $ref: '#/definitions/theater-ticket-system_internal_models_requests.Play'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/theater-ticket-system_internal_models_responses.Play'
+      summary: Create new play
+      tags:
+      - plays
+  /api/plays/{id}:
+    delete:
+      description: Delete a play
+      parameters:
+      - description: Play ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Delete play
+      tags:
+      - plays
+    get:
+      description: Get detailed information about a play
+      parameters:
+      - description: Play ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/theater-ticket-system_internal_models_responses.Play'
+      summary: Get play by ID
+      tags:
+      - plays
+    put:
+      consumes:
+      - application/json
+      description: Update an existing play
+      parameters:
+      - description: Play ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Play object
+        in: body
+        name: play
+        required: true
+        schema:
+          $ref: '#/definitions/theater-ticket-system_internal_models_requests.Play'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/theater-ticket-system_internal_models_responses.Play'
+      summary: Update play
+      tags:
+      - plays
+swagger: "2.0"
