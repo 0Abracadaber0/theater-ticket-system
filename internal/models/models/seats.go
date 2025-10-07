@@ -1,4 +1,4 @@
-package models
+package model
 
 import "github.com/google/uuid"
 
@@ -8,7 +8,7 @@ type Seat struct {
 
 	Row      int    `gorm:"not null"`
 	Number   int    `gorm:"not null"`
-	Category string `json:"category"` // parterre, balcony, box
+	Category string // parterre, balcony, box
 
 	Hall             Hall              `gorm:"foreignKey:HallID" json:"hall,omitempty"`
 	PerformanceSeats []PerformanceSeat `gorm:"foreignKey:SeatID" json:"performance_seats,omitempty"`
