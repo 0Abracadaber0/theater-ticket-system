@@ -3,11 +3,15 @@
     <h1>🎭 Театральная касса</h1>
     <p>Добро пожаловать в систему бронирования театральных билетов</p>
 
-    <div class="repertoire">
+    <div id="view-list" class="repertoire" style="display: none;">
         <h2>Репертуар</h2>
         <ul id="plays-list">
             <li>Загрузка...</li>
         </ul>
+    </div>
+
+    <div id="view-detail" style="display: none;">
+        <div id="play-detail"></div>
     </div>
 </div>
 {{ end }}
