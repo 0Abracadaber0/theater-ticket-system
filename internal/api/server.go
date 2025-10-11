@@ -1,7 +1,6 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
 	"log"
 	"strconv"
 	"theater-ticket-system/internal/api/controllers"
@@ -9,6 +8,8 @@ import (
 	"theater-ticket-system/internal/database/postgres"
 	"theater-ticket-system/internal/repository"
 	"theater-ticket-system/internal/services"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Server struct {

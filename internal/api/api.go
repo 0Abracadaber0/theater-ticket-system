@@ -1,11 +1,12 @@
 package api
 
 import (
+	"strings"
+	_ "theater-ticket-system/docs"
+
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"strings"
-	_ "theater-ticket-system/docs"
 )
 
 func (s *Server) setupRoutes() {

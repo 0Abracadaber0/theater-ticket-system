@@ -1,9 +1,10 @@
 package repository
 
 import (
+	"theater-ticket-system/internal/models/models"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"theater-ticket-system/internal/models/models"
 )
 
 type PlaysRepository interface {

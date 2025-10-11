@@ -2,9 +2,10 @@ package service
 
 import (
 	"errors"
-	"github.com/google/uuid"
 	"theater-ticket-system/internal/models/models"
 	"theater-ticket-system/internal/repository"
+
+	"github.com/google/uuid"
 )
 
 type PlaysService interface {
