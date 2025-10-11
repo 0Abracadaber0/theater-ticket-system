@@ -1,8 +1,9 @@
 package response
 
 import (
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Performance struct {
@@ -15,5 +16,4 @@ type Performance struct {
 
 	Play *Play `json:"play" binding:"omitempty"`
 	// Hall Hall `json:"hall" binding:"required"`
-
 }

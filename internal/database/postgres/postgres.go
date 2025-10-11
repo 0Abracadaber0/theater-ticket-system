@@ -2,12 +2,12 @@ package postgres
 
 import (
 	"fmt"
-	"github.com/google/uuid"
 	"log"
 	"theater-ticket-system/internal/config"
 	"theater-ticket-system/internal/models/models"
-
 	"time"
+
+	"github.com/google/uuid"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -30,7 +30,6 @@ func Init(cfg *config.Config) error {
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
-
 	if err != nil {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}
@@ -51,7 +50,6 @@ func Migrate() error {
 		&model.PerformanceSeat{},
 		&model.Booking{},
 	)
-
 	if err != nil {
 		return fmt.Errorf("failed to migrate: %w", err)
 	}

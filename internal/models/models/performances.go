@@ -1,10 +1,11 @@
 package model
 
 import (
-	"github.com/google/uuid"
-	"gorm.io/gorm"
 	response "theater-ticket-system/internal/models/responses"
 	"time"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 // Performance - показ спектакля
