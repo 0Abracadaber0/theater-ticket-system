@@ -3,6 +3,10 @@ package api
 import (
 	"strings"
 	_ "theater-ticket-system/docs"
+	"theater-ticket-system/internal/api/controllers"
+	"theater-ticket-system/internal/database/postgres"
+	"theater-ticket-system/internal/repository"
+	service "theater-ticket-system/internal/services"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -19,11 +23,15 @@ func (s *Server) setupRoutes() {
 
 		plays := api.Group("/plays")
 		{
-			plays.GET("", s.playsController.GetAllPlays)
-			plays.GET("/:id", s.playsController.GetPlayByID)
-			plays.POST("", s.playsController.CreatePlay)
-			plays.PUT("/:id", s.playsController.UpdatePlay)
-			plays.DELETE("/:id", s.playsController.DeletePlay)
+			playsRepo := repository.NewPlays(postgres.DB)
+			playsService := service.NewPlays(playsRepo)
+			playsController := controllers.NewPlays(playsService)
+
+			plays.GET("", playsController.GetAllPlays)
+			plays.GET("/:id", playsController.GetPlayByID)
+			plays.POST("", playsController.CreatePlay)
+			plays.PUT("/:id", playsController.UpdatePlay)
+			plays.DELETE("/:id", playsController.DeletePlay)
 		}
 	}
 

@@ -51,7 +51,7 @@ func (m *MockPlaysRepository) Delete(id uuid.UUID) error {
 func TestGetAllPlays(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockRepo := new(MockPlaysRepository)
-		service := NewPlaysService(mockRepo)
+		service := NewPlays(mockRepo)
 
 		expectedPlays := []model.Play{
 			{
@@ -84,7 +84,7 @@ func TestGetAllPlays(t *testing.T) {
 
 	t.Run("repository error", func(t *testing.T) {
 		mockRepo := new(MockPlaysRepository)
-		service := NewPlaysService(mockRepo)
+		service := NewPlays(mockRepo)
 
 		mockRepo.On("GetAll").Return(nil, errors.New("database error"))
 
@@ -98,7 +98,7 @@ func TestGetAllPlays(t *testing.T) {
 
 	t.Run("empty list", func(t *testing.T) {
 		mockRepo := new(MockPlaysRepository)
-		service := NewPlaysService(mockRepo)
+		service := NewPlays(mockRepo)
 
 		mockRepo.On("GetAll").Return([]model.Play{}, nil)
 
@@ -114,7 +114,7 @@ func TestGetAllPlays(t *testing.T) {
 func TestGetPlayByID(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockRepo := new(MockPlaysRepository)
-		service := NewPlaysService(mockRepo)
+		service := NewPlays(mockRepo)
 
 		playID := uuid.New()
 		expectedPlay := &model.Play{
@@ -139,7 +139,7 @@ func TestGetPlayByID(t *testing.T) {
 
 	t.Run("invalid uuid format", func(t *testing.T) {
 		mockRepo := new(MockPlaysRepository)
-		service := NewPlaysService(mockRepo)
+		service := NewPlays(mockRepo)
 
 		play, err := service.GetPlayByID("invalid-uuid")
 
@@ -151,7 +151,7 @@ func TestGetPlayByID(t *testing.T) {
 
 	t.Run("play not found", func(t *testing.T) {
 		mockRepo := new(MockPlaysRepository)
-		service := NewPlaysService(mockRepo)
+		service := NewPlays(mockRepo)
 
 		playID := uuid.New()
 		mockRepo.On("GetByID", playID).Return(nil, errors.New("not found"))
@@ -169,7 +169,7 @@ func TestGetPlayByID(t *testing.T) {
 func TestCreatePlay(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockRepo := new(MockPlaysRepository)
-		service := NewPlaysService(mockRepo)
+		service := NewPlays(mockRepo)
 
 		newPlay := &model.Play{
 			Title:       "Ревизор",
@@ -193,7 +193,7 @@ func TestCreatePlay(t *testing.T) {
 
 	t.Run("missing title", func(t *testing.T) {
 		mockRepo := new(MockPlaysRepository)
-		service := NewPlaysService(mockRepo)
+		service := NewPlays(mockRepo)
 
 		newPlay := &model.Play{
 			Title:    "",
@@ -210,7 +210,7 @@ func TestCreatePlay(t *testing.T) {
 
 	t.Run("missing author", func(t *testing.T) {
 		mockRepo := new(MockPlaysRepository)
-		service := NewPlaysService(mockRepo)
+		service := NewPlays(mockRepo)
 
 		newPlay := &model.Play{
 			Title:    "Ревизор",
@@ -227,7 +227,7 @@ func TestCreatePlay(t *testing.T) {
 
 	t.Run("invalid duration zero", func(t *testing.T) {
 		mockRepo := new(MockPlaysRepository)
-		service := NewPlaysService(mockRepo)
+		service := NewPlays(mockRepo)
 
 		newPlay := &model.Play{
 			Title:    "Ревизор",
@@ -244,7 +244,7 @@ func TestCreatePlay(t *testing.T) {
 
 	t.Run("invalid duration negative", func(t *testing.T) {
 		mockRepo := new(MockPlaysRepository)
-		service := NewPlaysService(mockRepo)
+		service := NewPlays(mockRepo)
 
 		newPlay := &model.Play{
 			Title:    "Ревизор",
@@ -261,7 +261,7 @@ func TestCreatePlay(t *testing.T) {
 
 	t.Run("repository error", func(t *testing.T) {
 		mockRepo := new(MockPlaysRepository)
-		service := NewPlaysService(mockRepo)
+		service := NewPlays(mockRepo)
 
 		newPlay := &model.Play{
 			Title:    "Ревизор",
@@ -283,7 +283,7 @@ func TestCreatePlay(t *testing.T) {
 func TestUpdatePlay(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockRepo := new(MockPlaysRepository)
-		service := NewPlaysService(mockRepo)
+		service := NewPlays(mockRepo)
 
 		playID := uuid.New()
 		createdAt := time.Now().Add(-24 * time.Hour)
@@ -319,7 +319,7 @@ func TestUpdatePlay(t *testing.T) {
 
 	t.Run("invalid uuid format", func(t *testing.T) {
 		mockRepo := new(MockPlaysRepository)
-		service := NewPlaysService(mockRepo)
+		service := NewPlays(mockRepo)
 
 		updatedPlay := &model.Play{
 			Title: "Новое название",
@@ -335,7 +335,7 @@ func TestUpdatePlay(t *testing.T) {
 
 	t.Run("play not found", func(t *testing.T) {
 		mockRepo := new(MockPlaysRepository)
-		service := NewPlaysService(mockRepo)
+		service := NewPlays(mockRepo)
 
 		playID := uuid.New()
 		updatedPlay := &model.Play{
@@ -354,7 +354,7 @@ func TestUpdatePlay(t *testing.T) {
 
 	t.Run("repository update error", func(t *testing.T) {
 		mockRepo := new(MockPlaysRepository)
-		service := NewPlaysService(mockRepo)
+		service := NewPlays(mockRepo)
 
 		playID := uuid.New()
 		existingPlay := &model.Play{
@@ -381,7 +381,7 @@ func TestUpdatePlay(t *testing.T) {
 func TestDeletePlay(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockRepo := new(MockPlaysRepository)
-		service := NewPlaysService(mockRepo)
+		service := NewPlays(mockRepo)
 
 		playID := uuid.New()
 		existingPlay := &model.Play{
@@ -400,7 +400,7 @@ func TestDeletePlay(t *testing.T) {
 
 	t.Run("invalid uuid format", func(t *testing.T) {
 		mockRepo := new(MockPlaysRepository)
-		service := NewPlaysService(mockRepo)
+		service := NewPlays(mockRepo)
 
 		err := service.DeletePlay("invalid-uuid")
 
@@ -412,7 +412,7 @@ func TestDeletePlay(t *testing.T) {
 
 	t.Run("play not found", func(t *testing.T) {
 		mockRepo := new(MockPlaysRepository)
-		service := NewPlaysService(mockRepo)
+		service := NewPlays(mockRepo)
 
 		playID := uuid.New()
 		mockRepo.On("GetByID", playID).Return(nil, errors.New("not found"))
@@ -427,7 +427,7 @@ func TestDeletePlay(t *testing.T) {
 
 	t.Run("repository delete error", func(t *testing.T) {
 		mockRepo := new(MockPlaysRepository)
-		service := NewPlaysService(mockRepo)
+		service := NewPlays(mockRepo)
 
 		playID := uuid.New()
 		existingPlay := &model.Play{
@@ -450,7 +450,7 @@ func TestDeletePlay(t *testing.T) {
 func TestServiceEdgeCases(t *testing.T) {
 	t.Run("create play with minimum valid values", func(t *testing.T) {
 		mockRepo := new(MockPlaysRepository)
-		service := NewPlaysService(mockRepo)
+		service := NewPlays(mockRepo)
 
 		newPlay := &model.Play{
 			Title:    "A",
@@ -468,7 +468,7 @@ func TestServiceEdgeCases(t *testing.T) {
 
 	t.Run("create play with very long strings", func(t *testing.T) {
 		mockRepo := new(MockPlaysRepository)
-		service := NewPlaysService(mockRepo)
+		service := NewPlays(mockRepo)
 
 		longString := string(make([]byte, 10000))
 		newPlay := &model.Play{
@@ -488,7 +488,7 @@ func TestServiceEdgeCases(t *testing.T) {
 
 	t.Run("update preserves created_at timestamp", func(t *testing.T) {
 		mockRepo := new(MockPlaysRepository)
-		service := NewPlaysService(mockRepo)
+		service := NewPlays(mockRepo)
 
 		playID := uuid.New()
 		originalCreatedAt := time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)

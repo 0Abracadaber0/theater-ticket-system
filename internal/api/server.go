@@ -3,19 +3,15 @@ package api
 import (
 	"log"
 	"strconv"
-	"theater-ticket-system/internal/api/controllers"
 	"theater-ticket-system/internal/config"
 	"theater-ticket-system/internal/database/postgres"
-	"theater-ticket-system/internal/repository"
-	"theater-ticket-system/internal/services"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
-	router          *gin.Engine
-	cfg             *config.Config
-	playsController *controllers.PlaysController
+	router *gin.Engine
+	cfg    *config.Config
 }
 
 func NewServer(cfg *config.Config) *Server {
@@ -23,14 +19,9 @@ func NewServer(cfg *config.Config) *Server {
 		log.Fatal("Failed to initialize database:", err)
 	}
 
-	playsRepo := repository.NewPlaysRepository(postgres.DB)
-	playsService := service.NewPlaysService(playsRepo)
-	playsController := controllers.NewPlaysController(playsService)
-
 	server := &Server{
-		router:          gin.Default(),
-		cfg:             cfg,
-		playsController: playsController,
+		router: gin.Default(),
+		cfg:    cfg,
 	}
 
 	server.setupRoutes()
