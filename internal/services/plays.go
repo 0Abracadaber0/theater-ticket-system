@@ -16,19 +16,19 @@ type PlaysRepository interface {
 	Delete(id uuid.UUID) error
 }
 
-type PlaysService struct {
-	repo repository.PlaysRepository
+type Plays struct {
+	repo PlaysRepository
 }
 
-func NewPlaysService(repo repository.PlaysRepository) *PlaysService {
-	return &PlaysService{repo: repo}
+func NewPlays(repo *repository.Plays) *Plays {
+	return &Plays{repo: repo}
 }
 
-func (s *PlaysService) GetAllPlays() ([]model.Play, error) {
+func (s *Plays) GetAllPlays() ([]model.Play, error) {
 	return s.repo.GetAll()
 }
 
-func (s *PlaysService) GetPlayByID(id string) (*model.Play, error) {
+func (s *Plays) GetPlayByID(id string) (*model.Play, error) {
 	playID, err := uuid.Parse(id)
 	if err != nil {
 		return nil, errors.New("invalid play ID format")
@@ -42,7 +42,7 @@ func (s *PlaysService) GetPlayByID(id string) (*model.Play, error) {
 	return play, nil
 }
 
-func (s *PlaysService) CreatePlay(play *model.Play) error {
+func (s *Plays) CreatePlay(play *model.Play) error {
 	play.ID = uuid.New()
 	if play.Title == "" {
 		return errors.New("play title is required")
@@ -57,7 +57,7 @@ func (s *PlaysService) CreatePlay(play *model.Play) error {
 	return s.repo.Create(play)
 }
 
-func (s *PlaysService) UpdatePlay(id string, play *model.Play) error {
+func (s *Plays) UpdatePlay(id string, play *model.Play) error {
 	playID, err := uuid.Parse(id)
 	if err != nil {
 		return errors.New("invalid play ID format")
@@ -74,7 +74,7 @@ func (s *PlaysService) UpdatePlay(id string, play *model.Play) error {
 	return s.repo.Update(play)
 }
 
-func (s *PlaysService) DeletePlay(id string) error {
+func (s *Plays) DeletePlay(id string) error {
 	playID, err := uuid.Parse(id)
 	if err != nil {
 		return errors.New("invalid play ID format")

@@ -17,12 +17,12 @@ type PlaysService interface {
 	DeletePlay(id string) error
 }
 
-type PlaysController struct {
+type Plays struct {
 	service PlaysService
 }
 
-func NewPlaysController(service PlaysService) *PlaysController {
-	return &PlaysController{service: service}
+func NewPlays(service PlaysService) *Plays {
+	return &Plays{service: service}
 }
 
 // GetAllPlays godoc
@@ -32,10 +32,10 @@ func NewPlaysController(service PlaysService) *PlaysController {
 // @Produce json
 // @Success 200 {array} response.Play
 // @Router /api/plays [get]
-func (pc *PlaysController) GetAllPlays(c *gin.Context) {
-	plays, err := pc.service.GetAllPlays()
+func (c *Plays) GetAllPlays(ctx *gin.Context) {
+	plays, err := c.service.GetAllPlays()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -44,7 +44,7 @@ func (pc *PlaysController) GetAllPlays(c *gin.Context) {
 		resp[i] = plays[i].Response()
 	}
 
-	c.JSON(http.StatusOK, resp)
+	ctx.JSON(http.StatusOK, resp)
 }
 
 // GetPlayByID godoc
@@ -55,16 +55,16 @@ func (pc *PlaysController) GetAllPlays(c *gin.Context) {
 // @Param id path string true "Play ID"
 // @Success 200 {object} response.Play
 // @Router /api/plays/{id} [get]
-func (pc *PlaysController) GetPlayByID(c *gin.Context) {
-	id := c.Param("id")
+func (c *Plays) GetPlayByID(ctx *gin.Context) {
+	id := ctx.Param("id")
 
-	play, err := pc.service.GetPlayByID(id)
+	play, err := c.service.GetPlayByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, play.Response())
+	ctx.JSON(http.StatusOK, play.Response())
 }
 
 // CreatePlay godoc
@@ -76,20 +76,20 @@ func (pc *PlaysController) GetPlayByID(c *gin.Context) {
 // @Param play body request.Play true "Play object"
 // @Success 201 {object} response.Play
 // @Router /api/plays [post]
-func (pc *PlaysController) CreatePlay(c *gin.Context) {
+func (c *Plays) CreatePlay(ctx *gin.Context) {
 	// todo отдавать на выход модель (чтобы был id и timestamps)
 	var req request.Play
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := pc.service.CreatePlay(req.Model()); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := c.service.CreatePlay(req.Model()); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, req.Model().Response())
+	ctx.JSON(http.StatusCreated, req.Model().Response())
 }
 
 // UpdatePlay godoc
@@ -102,22 +102,22 @@ func (pc *PlaysController) CreatePlay(c *gin.Context) {
 // @Param play body request.Play true "Play object"
 // @Success 200 {object} response.Play
 // @Router /api/plays/{id} [put]
-func (pc *PlaysController) UpdatePlay(c *gin.Context) {
+func (c *Plays) UpdatePlay(ctx *gin.Context) {
 	// todo отдавать на выход модель (чтобы был id и timestamps)
-	id := c.Param("id")
+	id := ctx.Param("id")
 
 	var req request.Play
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := pc.service.UpdatePlay(id, req.Model()); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := c.service.UpdatePlay(id, req.Model()); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, req.Model().Response())
+	ctx.JSON(http.StatusOK, req.Model().Response())
 }
 
 // DeletePlay godoc
@@ -128,13 +128,13 @@ func (pc *PlaysController) UpdatePlay(c *gin.Context) {
 // @Param id path string true "Play ID"
 // @Success 204
 // @Router /api/plays/{id} [delete]
-func (pc *PlaysController) DeletePlay(c *gin.Context) {
-	id := c.Param("id")
+func (c *Plays) DeletePlay(ctx *gin.Context) {
+	id := ctx.Param("id")
 
-	if err := pc.service.DeletePlay(id); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := c.service.DeletePlay(id); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusNoContent, nil)
+	ctx.JSON(http.StatusNoContent, nil)
 }
