@@ -2,18 +2,26 @@ package controllers
 
 import (
 	"net/http"
+	model "theater-ticket-system/internal/models/models"
 	"theater-ticket-system/internal/models/requests"
 	"theater-ticket-system/internal/models/responses"
-	"theater-ticket-system/internal/services"
 
 	"github.com/gin-gonic/gin"
 )
 
-type PlaysController struct {
-	service service.PlaysService
+type PlaysService interface {
+	GetAllPlays() ([]model.Play, error)
+	GetPlayByID(id string) (*model.Play, error)
+	CreatePlay(play *model.Play) error
+	UpdatePlay(id string, play *model.Play) error
+	DeletePlay(id string) error
 }
 
-func NewPlaysController(service service.PlaysService) *PlaysController {
+type PlaysController struct {
+	service PlaysService
+}
+
+func NewPlaysController(service PlaysService) *PlaysController {
 	return &PlaysController{service: service}
 }
 

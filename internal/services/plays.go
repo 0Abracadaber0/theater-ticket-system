@@ -8,27 +8,27 @@ import (
 	"github.com/google/uuid"
 )
 
-type PlaysService interface {
-	GetAllPlays() ([]model.Play, error)
-	GetPlayByID(id string) (*model.Play, error)
-	CreatePlay(play *model.Play) error
-	UpdatePlay(id string, play *model.Play) error
-	DeletePlay(id string) error
+type PlaysRepository interface {
+	GetAll() ([]model.Play, error)
+	GetByID(id uuid.UUID) (*model.Play, error)
+	Create(play *model.Play) error
+	Update(play *model.Play) error
+	Delete(id uuid.UUID) error
 }
 
-type playsService struct {
+type PlaysService struct {
 	repo repository.PlaysRepository
 }
 
-func NewPlaysService(repo repository.PlaysRepository) PlaysService {
-	return &playsService{repo: repo}
+func NewPlaysService(repo repository.PlaysRepository) *PlaysService {
+	return &PlaysService{repo: repo}
 }
 
-func (s *playsService) GetAllPlays() ([]model.Play, error) {
+func (s *PlaysService) GetAllPlays() ([]model.Play, error) {
 	return s.repo.GetAll()
 }
 
-func (s *playsService) GetPlayByID(id string) (*model.Play, error) {
+func (s *PlaysService) GetPlayByID(id string) (*model.Play, error) {
 	playID, err := uuid.Parse(id)
 	if err != nil {
 		return nil, errors.New("invalid play ID format")
@@ -42,7 +42,7 @@ func (s *playsService) GetPlayByID(id string) (*model.Play, error) {
 	return play, nil
 }
 
-func (s *playsService) CreatePlay(play *model.Play) error {
+func (s *PlaysService) CreatePlay(play *model.Play) error {
 	play.ID = uuid.New()
 	if play.Title == "" {
 		return errors.New("play title is required")
@@ -57,7 +57,7 @@ func (s *playsService) CreatePlay(play *model.Play) error {
 	return s.repo.Create(play)
 }
 
-func (s *playsService) UpdatePlay(id string, play *model.Play) error {
+func (s *PlaysService) UpdatePlay(id string, play *model.Play) error {
 	playID, err := uuid.Parse(id)
 	if err != nil {
 		return errors.New("invalid play ID format")
@@ -74,7 +74,7 @@ func (s *playsService) UpdatePlay(id string, play *model.Play) error {
 	return s.repo.Update(play)
 }
 
-func (s *playsService) DeletePlay(id string) error {
+func (s *PlaysService) DeletePlay(id string) error {
 	playID, err := uuid.Parse(id)
 	if err != nil {
 		return errors.New("invalid play ID format")
