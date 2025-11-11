@@ -1,6 +1,10 @@
 package model
 
-import "github.com/google/uuid"
+import (
+	response "theater-ticket-system/internal/models/responses"
+
+	"github.com/google/uuid"
+)
 
 type Seat struct {
 	ID     uuid.UUID `gorm:"primaryKey"`
@@ -14,6 +18,16 @@ type Seat struct {
 	PerformanceSeats []PerformanceSeat `gorm:"foreignKey:SeatID" json:"performance_seats,omitempty"`
 }
 
-func (Seat) TableName() string {
+func (*Seat) TableName() string {
 	return "seats"
+}
+
+func (s *Seat) Response() response.Seat {
+	return response.Seat{
+		ID:       s.ID,
+		HallID:   s.HallID,
+		Row:      s.Row,
+		Number:   s.Number,
+		Category: s.Category,
+	}
 }

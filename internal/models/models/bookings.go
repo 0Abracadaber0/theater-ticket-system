@@ -1,6 +1,7 @@
 package model
 
 import (
+	response "theater-ticket-system/internal/models/responses"
 	"time"
 
 	"github.com/google/uuid"
@@ -24,6 +25,32 @@ type Booking struct {
 	PerformanceSeats []PerformanceSeat `gorm:"foreignKey:BookingID"`
 }
 
-func (Booking) TableName() string {
+func (*Booking) TableName() string {
 	return "bookings"
+}
+
+func (b *Booking) Response() response.Booking {
+	seats := make([]response.PerformanceSeat, len(b.PerformanceSeats))
+	for i := range b.PerformanceSeats {
+		seats[i] = b.PerformanceSeats[i].Response()
+	}
+
+	return response.Booking{
+		ID:            b.ID,
+		UserID:        b.UserID,
+		PerformanceID: b.PerformanceID,
+		TotalPrice:    b.TotalPrice,
+		Status:        b.Status,
+		ExpiresAt:     b.ExpiresAt,
+		CreatedAt:     b.CreatedAt,
+		UpdatedAt:     b.UpdatedAt,
+		Performance: func() *response.Performance {
+			if b.Performance.ID != uuid.Nil {
+				perf := b.Performance.Response()
+				return &perf
+			}
+			return nil
+		}(),
+		Seats: seats,
+	}
 }
