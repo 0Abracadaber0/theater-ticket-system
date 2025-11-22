@@ -15,6 +15,264 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/bookings": {
+            "get": {
+                "description": "Get booking history for a user by phone number",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bookings"
+                ],
+                "summary": "Get user bookings",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User phone number",
+                        "name": "phone",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/theater-ticket-system_internal_models_responses.Booking"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new booking for selected seats. User will be created or found by phone number",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bookings"
+                ],
+                "summary": "Create booking",
+                "parameters": [
+                    {
+                        "description": "Booking object",
+                        "name": "booking",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/theater-ticket-system_internal_models_requests.CreateBooking"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/theater-ticket-system_internal_models_responses.Booking"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/bookings/{id}": {
+            "get": {
+                "description": "Get detailed information about a booking",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bookings"
+                ],
+                "summary": "Get booking by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Booking ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/theater-ticket-system_internal_models_responses.Booking"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/bookings/{id}/cancel": {
+            "patch": {
+                "description": "Cancel an existing booking (only pending bookings can be cancelled)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bookings"
+                ],
+                "summary": "Cancel booking",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Booking ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/theater-ticket-system_internal_models_responses.Booking"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/halls/{id}/seats": {
+            "get": {
+                "description": "Get static hall layout (not tied to a specific performance)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "seats"
+                ],
+                "summary": "Get hall seats",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Hall ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/theater-ticket-system_internal_models_responses.Seat"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/performances": {
+            "get": {
+                "description": "Get list of all performances with optional filters",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "performances"
+                ],
+                "summary": "Get all performances",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by play ID",
+                        "name": "play_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by date from (RFC3339)",
+                        "name": "date_from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by date to (RFC3339)",
+                        "name": "date_to",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/theater-ticket-system_internal_models_responses.Performance"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/performances/{id}": {
+            "get": {
+                "description": "Get detailed information about a performance",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "performances"
+                ],
+                "summary": "Get performance by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Performance ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/theater-ticket-system_internal_models_responses.Performance"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/performances/{id}/seats": {
+            "get": {
+                "description": "Get hall layout with seat availability for a performance",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "performances"
+                ],
+                "summary": "Get performance seats",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Performance ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/theater-ticket-system_internal_models_responses.PerformanceSeat"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/plays": {
             "get": {
                 "description": "Get list of all plays",
@@ -164,6 +422,33 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "theater-ticket-system_internal_models_requests.CreateBooking": {
+            "type": "object",
+            "required": [
+                "name",
+                "performance_id",
+                "phone",
+                "seat_ids"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "performance_id": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "seat_ids": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "theater-ticket-system_internal_models_requests.Play": {
             "type": "object",
             "required": [
@@ -191,6 +476,55 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "theater-ticket-system_internal_models_responses.Booking": {
+            "type": "object",
+            "required": [
+                "created_at",
+                "expires_at",
+                "id",
+                "performance_id",
+                "status",
+                "total_price",
+                "updated_at",
+                "user_id"
+            ],
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "expires_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "performance": {
+                    "$ref": "#/definitions/theater-ticket-system_internal_models_responses.Performance"
+                },
+                "performance_id": {
+                    "type": "string"
+                },
+                "seats": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/theater-ticket-system_internal_models_responses.PerformanceSeat"
+                    }
+                },
+                "status": {
+                    "description": "pending, confirmed, cancelled",
+                    "type": "string"
+                },
+                "total_price": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "string"
                 }
             }
@@ -225,6 +559,37 @@ const docTemplate = `{
                     ]
                 },
                 "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "theater-ticket-system_internal_models_responses.PerformanceSeat": {
+            "type": "object",
+            "required": [
+                "id",
+                "performance_id",
+                "price",
+                "seat_id",
+                "status"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "performance_id": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "seat": {
+                    "$ref": "#/definitions/theater-ticket-system_internal_models_responses.Seat"
+                },
+                "seat_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "description": "available, reserved, sold",
                     "type": "string"
                 }
             }
@@ -275,6 +640,34 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "theater-ticket-system_internal_models_responses.Seat": {
+            "type": "object",
+            "required": [
+                "category",
+                "hall_id",
+                "id",
+                "number",
+                "row"
+            ],
+            "properties": {
+                "category": {
+                    "description": "parterre, balcony, box",
+                    "type": "string"
+                },
+                "hall_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "integer"
+                },
+                "row": {
+                    "type": "integer"
                 }
             }
         }

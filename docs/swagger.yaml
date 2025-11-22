@@ -1,4 +1,23 @@
 definitions:
+  theater-ticket-system_internal_models_requests.CreateBooking:
+    properties:
+      name:
+        type: string
+      performance_id:
+        type: string
+      phone:
+        type: string
+      seat_ids:
+        items:
+          type: string
+        minItems: 1
+        type: array
+    required:
+    - name
+    - performance_id
+    - phone
+    - seat_ids
+    type: object
   theater-ticket-system_internal_models_requests.Play:
     properties:
       author:
@@ -20,6 +39,41 @@ definitions:
     - genre
     - poster_url
     - title
+    type: object
+  theater-ticket-system_internal_models_responses.Booking:
+    properties:
+      created_at:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: string
+      performance:
+        $ref: '#/definitions/theater-ticket-system_internal_models_responses.Performance'
+      performance_id:
+        type: string
+      seats:
+        items:
+          $ref: '#/definitions/theater-ticket-system_internal_models_responses.PerformanceSeat'
+        type: array
+      status:
+        description: pending, confirmed, cancelled
+        type: string
+      total_price:
+        type: integer
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    required:
+    - created_at
+    - expires_at
+    - id
+    - performance_id
+    - status
+    - total_price
+    - updated_at
+    - user_id
     type: object
   theater-ticket-system_internal_models_responses.Performance:
     properties:
@@ -44,6 +98,28 @@ definitions:
     - date
     - id
     - updated_at
+    type: object
+  theater-ticket-system_internal_models_responses.PerformanceSeat:
+    properties:
+      id:
+        type: string
+      performance_id:
+        type: string
+      price:
+        type: integer
+      seat:
+        $ref: '#/definitions/theater-ticket-system_internal_models_responses.Seat'
+      seat_id:
+        type: string
+      status:
+        description: available, reserved, sold
+        type: string
+    required:
+    - id
+    - performance_id
+    - price
+    - seat_id
+    - status
     type: object
   theater-ticket-system_internal_models_responses.Play:
     properties:
@@ -80,9 +156,199 @@ definitions:
     - title
     - updated_at
     type: object
+  theater-ticket-system_internal_models_responses.Seat:
+    properties:
+      category:
+        description: parterre, balcony, box
+        type: string
+      hall_id:
+        type: string
+      id:
+        type: string
+      number:
+        type: integer
+      row:
+        type: integer
+    required:
+    - category
+    - hall_id
+    - id
+    - number
+    - row
+    type: object
 info:
   contact: {}
 paths:
+  /api/bookings:
+    get:
+      description: Get booking history for a user by phone number
+      parameters:
+      - description: User phone number
+        in: query
+        name: phone
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/theater-ticket-system_internal_models_responses.Booking'
+            type: array
+      summary: Get user bookings
+      tags:
+      - bookings
+    post:
+      consumes:
+      - application/json
+      description: Create a new booking for selected seats. User will be created or
+        found by phone number
+      parameters:
+      - description: Booking object
+        in: body
+        name: booking
+        required: true
+        schema:
+          $ref: '#/definitions/theater-ticket-system_internal_models_requests.CreateBooking'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/theater-ticket-system_internal_models_responses.Booking'
+      summary: Create booking
+      tags:
+      - bookings
+  /api/bookings/{id}:
+    get:
+      description: Get detailed information about a booking
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/theater-ticket-system_internal_models_responses.Booking'
+      summary: Get booking by ID
+      tags:
+      - bookings
+  /api/bookings/{id}/cancel:
+    patch:
+      description: Cancel an existing booking (only pending bookings can be cancelled)
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/theater-ticket-system_internal_models_responses.Booking'
+      summary: Cancel booking
+      tags:
+      - bookings
+  /api/halls/{id}/seats:
+    get:
+      description: Get static hall layout (not tied to a specific performance)
+      parameters:
+      - description: Hall ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/theater-ticket-system_internal_models_responses.Seat'
+            type: array
+      summary: Get hall seats
+      tags:
+      - seats
+  /api/performances:
+    get:
+      description: Get list of all performances with optional filters
+      parameters:
+      - description: Filter by play ID
+        in: query
+        name: play_id
+        type: string
+      - description: Filter by date from (RFC3339)
+        in: query
+        name: date_from
+        type: string
+      - description: Filter by date to (RFC3339)
+        in: query
+        name: date_to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/theater-ticket-system_internal_models_responses.Performance'
+            type: array
+      summary: Get all performances
+      tags:
+      - performances
+  /api/performances/{id}:
+    get:
+      description: Get detailed information about a performance
+      parameters:
+      - description: Performance ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/theater-ticket-system_internal_models_responses.Performance'
+      summary: Get performance by ID
+      tags:
+      - performances
+  /api/performances/{id}/seats:
+    get:
+      description: Get hall layout with seat availability for a performance
+      parameters:
+      - description: Performance ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/theater-ticket-system_internal_models_responses.PerformanceSeat'
+            type: array
+      summary: Get performance seats
+      tags:
+      - performances
   /api/plays:
     get:
       description: Get list of all plays

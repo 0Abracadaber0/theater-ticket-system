@@ -21,6 +21,7 @@ func (s *Server) setupRoutes() {
 			c.JSON(200, gin.H{"status": "ok"})
 		})
 
+		// Plays
 		plays := api.Group("/plays")
 		{
 			playsRepo := repository.NewPlays(postgres.DB)
@@ -32,6 +33,42 @@ func (s *Server) setupRoutes() {
 			plays.POST("", playsController.CreatePlay)
 			plays.PUT("/:id", playsController.UpdatePlay)
 			plays.DELETE("/:id", playsController.DeletePlay)
+		}
+
+		// Performances
+		performances := api.Group("/performances")
+		{
+			performancesRepo := repository.NewPerformances(postgres.DB)
+			performancesService := service.NewPerformances(performancesRepo)
+			performancesController := controllers.NewPerformancesController(performancesService)
+
+			performances.GET("", performancesController.GetAllPerformances)
+			performances.GET("/:id", performancesController.GetPerformanceByID)
+			performances.GET("/:id/seats", performancesController.GetPerformanceSeats)
+		}
+
+		// Halls/Seats
+		halls := api.Group("/halls")
+		{
+			seatsRepo := repository.NewSeats(postgres.DB)
+			seatsService := service.NewSeats(seatsRepo)
+			seatsController := controllers.NewSeatsController(seatsService)
+
+			halls.GET("/:id/seats", seatsController.GetHallSeats)
+		}
+
+		// Bookings
+		bookings := api.Group("/bookings")
+		{
+			bookingsRepo := repository.NewBookings(postgres.DB)
+			usersRepo := repository.NewUsers(postgres.DB)
+			bookingsService := service.NewBookings(bookingsRepo, usersRepo)
+			bookingsController := controllers.NewBookingsController(bookingsService)
+
+			bookings.POST("", bookingsController.CreateBooking)
+			bookings.GET("/:id", bookingsController.GetBookingByID)
+			bookings.GET("", bookingsController.GetUserBookings)
+			bookings.PATCH("/:id/cancel", bookingsController.CancelBooking)
 		}
 	}
 
