@@ -116,23 +116,63 @@ async function showBookingsView() {
     const container = document.getElementById('bookings-container');
     if (!container) return;
 
-    const phone = prompt('Введите ваш номер телефона для просмотра бронирований:');
-    if (!phone) {
+    // Шаг 1: Запрос email
+    const email = prompt('Введите ваш email для просмотра бронирований:');
+    if (!email) {
         window.location.hash = '#list';
         return;
     }
 
-    container.innerHTML = 'Загрузка бронирований...';
+    container.innerHTML = 'Отправка кода подтверждения...';
 
     try {
-        const response = await fetch(`/api/bookings?phone=${encodeURIComponent(phone)}`);
-        if (!response.ok) throw new Error('Ошибка загрузки бронирований');
+        // Отправляем код на email
+        const sendCodeResp = await fetch('/api/auth/send-code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
 
-        const bookings = await response.json();
+        if (!sendCodeResp.ok) {
+            throw new Error('Ошибка отправки кода');
+        }
+
+        // Шаг 2: Запрос кода
+        const code = prompt('На ваш email отправлен код подтверждения. Введите его:');
+        if (!code) {
+            window.location.hash = '#list';
+            return;
+        }
+
+        container.innerHTML = 'Проверка кода...';
+
+        // Проверяем код
+        const verifyResp = await fetch('/api/auth/verify-code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, code })
+        });
+
+        if (!verifyResp.ok) {
+            throw new Error('Неверный код');
+        }
+
+        const verifyResult = await verifyResp.json();
+        if (!verifyResult.verified) {
+            throw new Error('Код не подтвержден');
+        }
+
+        // Шаг 3: Загружаем бронирования
+        container.innerHTML = 'Загрузка бронирований...';
+
+        const bookingsResp = await fetch(`/api/bookings?email=${encodeURIComponent(email)}`);
+        if (!bookingsResp.ok) throw new Error('Ошибка загрузки бронирований');
+
+        const bookings = await bookingsResp.json();
         container.innerHTML = renderBookingsHtml(bookings);
     } catch (e) {
-        console.error('Ошибка загрузки бронирований:', e);
-        container.innerHTML = '<div style="color: red;">Не удалось загрузить бронирования</div>';
+        console.error('Ошибка:', e);
+        container.innerHTML = `<div style="color: red;">Ошибка: ${e.message}</div>`;
     }
 }
 
@@ -328,8 +368,8 @@ async function proceedToBooking() {
         return;
     }
 
-    const phone = prompt('Введите ваш номер телефона:');
-    if (!phone) return;
+    const email = prompt('Введите ваш email:');
+    if (!email) return;
 
     const name = prompt('Введите ваше имя:');
     if (!name) return;
@@ -339,7 +379,7 @@ async function proceedToBooking() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                phone: phone,
+                email: email,
                 name: name,
                 performance_id: currentPerformanceId,
                 seat_ids: selectedSeats.map(s => s.id)

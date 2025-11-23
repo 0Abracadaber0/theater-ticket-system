@@ -24,7 +24,7 @@ func (r *Plays) GetAll() ([]model.Play, error) {
 
 func (r *Plays) GetByID(id uuid.UUID) (*model.Play, error) {
 	var play model.Play
-	err := r.db.First(&play, "id = ?", id).Error
+	err := r.db.Preload("Performances").First(&play, "id = ?", id).Error
 	if err != nil {
 		return nil, err
 	}

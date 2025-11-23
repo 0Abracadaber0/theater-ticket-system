@@ -1,23 +1,4 @@
 definitions:
-  theater-ticket-system_internal_models_requests.CreateBooking:
-    properties:
-      name:
-        type: string
-      performance_id:
-        type: string
-      phone:
-        type: string
-      seat_ids:
-        items:
-          type: string
-        minItems: 1
-        type: array
-    required:
-    - name
-    - performance_id
-    - phone
-    - seat_ids
-    type: object
   theater-ticket-system_internal_models_requests.Play:
     properties:
       author:
@@ -179,13 +160,71 @@ definitions:
 info:
   contact: {}
 paths:
+  /api/auth/send-code:
+    post:
+      consumes:
+      - application/json
+      description: Send verification code to email
+      parameters:
+      - description: Email
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            email:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              message:
+                type: string
+            type: object
+      summary: Send verification code
+      tags:
+      - auth
+  /api/auth/verify-code:
+    post:
+      consumes:
+      - application/json
+      description: Verify email with code
+      parameters:
+      - description: Email and code
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            code:
+              type: string
+            email:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              verified:
+                type: boolean
+            type: object
+      summary: Verify code
+      tags:
+      - auth
   /api/bookings:
     get:
-      description: Get booking history for a user by phone number
+      description: Get booking history for a user by email
       parameters:
-      - description: User phone number
+      - description: User email
         in: query
-        name: phone
+        name: email
         required: true
         type: string
       produces:
@@ -204,14 +243,25 @@ paths:
       consumes:
       - application/json
       description: Create a new booking for selected seats. User will be created or
-        found by phone number
+        found by email
       parameters:
       - description: Booking object
         in: body
         name: booking
         required: true
         schema:
-          $ref: '#/definitions/theater-ticket-system_internal_models_requests.CreateBooking'
+          properties:
+            email:
+              type: string
+            name:
+              type: string
+            performance_id:
+              type: string
+            seat_ids:
+              items:
+                type: string
+              type: array
+          type: object
       produces:
       - application/json
       responses:
