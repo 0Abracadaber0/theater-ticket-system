@@ -2,10 +2,8 @@ package service
 
 import (
 	"errors"
-	"theater-ticket-system/internal/models/models"
-	"theater-ticket-system/internal/repository"
-
 	"github.com/google/uuid"
+	"theater-ticket-system/internal/models/models"
 )
 
 type SeatsRepository interface {
@@ -16,7 +14,7 @@ type Seats struct {
 	repo SeatsRepository
 }
 
-func NewSeats(repo *repository.Seats) *Seats {
+func NewSeats(repo SeatsRepository) *Seats {
 	return &Seats{repo: repo}
 }
 
