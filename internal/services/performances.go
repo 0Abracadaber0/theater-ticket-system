@@ -3,7 +3,6 @@ package service
 import (
 	"errors"
 	"theater-ticket-system/internal/models/models"
-	"theater-ticket-system/internal/repository"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,7 +18,7 @@ type Performances struct {
 	repo PerformancesRepository
 }
 
-func NewPerformances(repo *repository.Performances) *Performances {
+func NewPerformances(repo PerformancesRepository) *Performances {
 	return &Performances{repo: repo}
 }
 

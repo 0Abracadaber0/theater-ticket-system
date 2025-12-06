@@ -2,11 +2,9 @@ package service
 
 import (
 	"errors"
-	"theater-ticket-system/internal/models/models"
-	"theater-ticket-system/internal/repository"
-
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"theater-ticket-system/internal/models/models"
 )
 
 type BookingsRepository interface {
@@ -29,7 +27,7 @@ type Bookings struct {
 	usersRepo UsersRepository
 }
 
-func NewBookings(repo *repository.Bookings, usersRepo *repository.Users) *Bookings {
+func NewBookings(repo BookingsRepository, usersRepo UsersRepository) *Bookings {
 	return &Bookings{
 		repo:      repo,
 		usersRepo: usersRepo,
