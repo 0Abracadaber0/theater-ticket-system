@@ -49,6 +49,7 @@ func Migrate() error {
 		&model.Performance{},
 		&model.PerformanceSeat{},
 		&model.Booking{},
+		&model.EmailVerification{},
 	)
 	if err != nil {
 		return fmt.Errorf("failed to migrate: %w", err)

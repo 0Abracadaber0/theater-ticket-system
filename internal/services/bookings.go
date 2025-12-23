@@ -17,7 +17,7 @@ type BookingsRepository interface {
 }
 
 type UsersRepository interface {
-	FindByPhone(phone string) (*model.User, error)
+	FindByEmail(email string) (*model.User, error)
 	Create(user *model.User) error
 	GetByID(id uuid.UUID) (*model.User, error)
 }
@@ -34,20 +34,19 @@ func NewBookings(repo BookingsRepository, usersRepo UsersRepository) *Bookings {
 	}
 }
 
-func (s *Bookings) CreateBooking(phone, name string, performanceID uuid.UUID, seatIDs []uuid.UUID) (*model.Booking, error) {
+func (s *Bookings) CreateBooking(email, name string, performanceID uuid.UUID, seatIDs []uuid.UUID) (*model.Booking, error) {
 	if len(seatIDs) == 0 {
 		return nil, errors.New("at least one seat must be selected")
 	}
 
-	// Найти или создать пользователя по телефону
-	user, err := s.usersRepo.FindByPhone(phone)
+	// Найти или создать пользователя по email
+	user, err := s.usersRepo.FindByEmail(email)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			// Создаем нового пользователя
 			user = &model.User{
-				Phone:        phone,
+				Email:        email,
 				Name:         name,
-				Email:        "", // Email опционален
 				PasswordHash: "", // Для гостевых бронирований
 			}
 			if err := s.usersRepo.Create(user); err != nil {
@@ -117,12 +116,12 @@ func (s *Bookings) GetBookingByID(id string) (*model.Booking, error) {
 	return booking, nil
 }
 
-func (s *Bookings) GetUserBookings(phone string) ([]model.Booking, error) {
-	if phone == "" {
-		return nil, errors.New("phone is required")
+func (s *Bookings) GetUserBookings(email string) ([]model.Booking, error) {
+	if email == "" {
+		return nil, errors.New("email is required")
 	}
 
-	user, err := s.usersRepo.FindByPhone(phone)
+	user, err := s.usersRepo.FindByEmail(email)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return []model.Booking{}, nil

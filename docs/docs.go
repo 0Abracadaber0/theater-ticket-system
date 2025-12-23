@@ -15,9 +15,100 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/auth/send-code": {
+            "post": {
+                "description": "Send verification code to email",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Send verification code",
+                "parameters": [
+                    {
+                        "description": "Email",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "email": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/verify-code": {
+            "post": {
+                "description": "Verify email with code",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Verify code",
+                "parameters": [
+                    {
+                        "description": "Email and code",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "code": {
+                                    "type": "string"
+                                },
+                                "email": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "verified": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/bookings": {
             "get": {
-                "description": "Get booking history for a user by phone number",
+                "description": "Get booking history for a user by email",
                 "produces": [
                     "application/json"
                 ],
@@ -28,8 +119,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User phone number",
-                        "name": "phone",
+                        "description": "User email",
+                        "name": "email",
                         "in": "query",
                         "required": true
                     }
@@ -47,7 +138,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Create a new booking for selected seats. User will be created or found by phone number",
+                "description": "Create a new booking for selected seats. User will be created or found by email",
                 "consumes": [
                     "application/json"
                 ],
@@ -65,7 +156,24 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/theater-ticket-system_internal_models_requests.CreateBooking"
+                            "type": "object",
+                            "properties": {
+                                "email": {
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "performance_id": {
+                                    "type": "string"
+                                },
+                                "seat_ids": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
                         }
                     }
                 ],
@@ -422,33 +530,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "theater-ticket-system_internal_models_requests.CreateBooking": {
-            "type": "object",
-            "required": [
-                "name",
-                "performance_id",
-                "phone",
-                "seat_ids"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "performance_id": {
-                    "type": "string"
-                },
-                "phone": {
-                    "type": "string"
-                },
-                "seat_ids": {
-                    "type": "array",
-                    "minItems": 1,
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
         "theater-ticket-system_internal_models_requests.Play": {
             "type": "object",
             "required": [

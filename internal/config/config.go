@@ -9,8 +9,9 @@ import (
 )
 
 type Config struct {
-	Port int
-	DB   DBConfig
+	Port  int
+	DB    DBConfig
+	Email EmailConfig
 }
 
 type DBConfig struct {
@@ -19,6 +20,13 @@ type DBConfig struct {
 	User     string
 	Password string
 	Name     string
+}
+
+type EmailConfig struct {
+	From     string
+	Password string
+	SMTPHost string
+	SMTPPort string
 }
 
 func Init() *Config {
@@ -44,6 +52,12 @@ func Init() *Config {
 			User:     getEnv("DB_USER", "postgres"),
 			Password: getEnv("DB_PASSWORD", "postgres"),
 			Name:     getEnv("DB_NAME", "theater_tickets"),
+		},
+		Email: EmailConfig{
+			From:     getEnv("EMAIL_FROM", ""),
+			Password: getEnv("EMAIL_PASSWORD", ""),
+			SMTPHost: getEnv("SMTP_HOST", "smtp.gmail.com"),
+			SMTPPort: getEnv("SMTP_PORT", "587"),
 		},
 	}
 }

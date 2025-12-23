@@ -21,6 +21,18 @@ func (s *Server) setupRoutes() {
 			c.JSON(200, gin.H{"status": "ok"})
 		})
 
+		// Auth
+		auth := api.Group("/auth")
+		{
+			authRepo := repository.NewAuth(postgres.DB)
+			emailService := service.NewEmailService(s.cfg)
+			authService := service.NewAuth(authRepo, emailService)
+			authController := controllers.NewAuthController(authService)
+
+			auth.POST("/send-code", authController.SendCode)
+			auth.POST("/verify-code", authController.VerifyCode)
+		}
+
 		// Plays
 		plays := api.Group("/plays")
 		{

@@ -3,7 +3,6 @@ package controllers
 import (
 	"net/http"
 	model "theater-ticket-system/internal/models/models"
-	request "theater-ticket-system/internal/models/requests"
 	response "theater-ticket-system/internal/models/responses"
 
 	"github.com/gin-gonic/gin"
@@ -11,9 +10,9 @@ import (
 )
 
 type BookingsService interface {
-	CreateBooking(phone, name string, performanceID uuid.UUID, seatIDs []uuid.UUID) (*model.Booking, error)
+	CreateBooking(email, name string, performanceID uuid.UUID, seatIDs []uuid.UUID) (*model.Booking, error)
 	GetBookingByID(id string) (*model.Booking, error)
-	GetUserBookings(phone string) ([]model.Booking, error)
+	GetUserBookings(email string) ([]model.Booking, error)
 	CancelBooking(id string) error
 }
 
@@ -27,21 +26,27 @@ func NewBookingsController(service BookingsService) *BookingsController {
 
 // CreateBooking godoc
 // @Summary Create booking
-// @Description Create a new booking for selected seats. User will be created or found by phone number
+// @Description Create a new booking for selected seats. User will be created or found by email
 // @Tags bookings
 // @Accept json
 // @Produce json
-// @Param booking body request.CreateBooking true "Booking object"
+// @Param booking body object{email=string,name=string,performance_id=string,seat_ids=[]string} true "Booking object"
 // @Success 201 {object} response.Booking
 // @Router /api/bookings [post]
 func (c *BookingsController) CreateBooking(ctx *gin.Context) {
-	var req request.CreateBooking
+	var req struct {
+		Email         string      `json:"email" binding:"required,email"`
+		Name          string      `json:"name" binding:"required"`
+		PerformanceID uuid.UUID   `json:"performance_id" binding:"required"`
+		SeatIDs       []uuid.UUID `json:"seat_ids" binding:"required,min=1"`
+	}
+
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	booking, err := c.service.CreateBooking(req.Phone, req.Name, req.PerformanceID, req.SeatIDs)
+	booking, err := c.service.CreateBooking(req.Email, req.Name, req.PerformanceID, req.SeatIDs)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -72,20 +77,20 @@ func (c *BookingsController) GetBookingByID(ctx *gin.Context) {
 
 // GetUserBookings godoc
 // @Summary Get user bookings
-// @Description Get booking history for a user by phone number
+// @Description Get booking history for a user by email
 // @Tags bookings
 // @Produce json
-// @Param phone query string true "User phone number"
+// @Param email query string true "User email"
 // @Success 200 {array} response.Booking
 // @Router /api/bookings [get]
 func (c *BookingsController) GetUserBookings(ctx *gin.Context) {
-	phone := ctx.Query("phone")
-	if phone == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "phone is required"})
+	email := ctx.Query("email")
+	if email == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "email is required"})
 		return
 	}
 
-	bookings, err := c.service.GetUserBookings(phone)
+	bookings, err := c.service.GetUserBookings(email)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

@@ -116,23 +116,31 @@ async function showBookingsView() {
     const container = document.getElementById('bookings-container');
     if (!container) return;
 
-    const phone = prompt('Введите ваш номер телефона для просмотра бронирований:');
-    if (!phone) {
-        window.location.hash = '#list';
+    // Если email уже верифицирован, сразу загружаем бронирования
+    if (verifiedEmail) {
+        loadUserBookings(container, verifiedEmail);
         return;
     }
 
+    // Показываем форму email + код
+    showEmailCodeModal(async (email) => {
+        verifiedEmail = email; // Сохраняем верифицированный email
+        loadUserBookings(container, email);
+    });
+}
+
+async function loadUserBookings(container, email) {
     container.innerHTML = 'Загрузка бронирований...';
 
     try {
-        const response = await fetch(`/api/bookings?phone=${encodeURIComponent(phone)}`);
-        if (!response.ok) throw new Error('Ошибка загрузки бронирований');
+        const bookingsResp = await fetch(`/api/bookings?email=${encodeURIComponent(email)}`);
+        if (!bookingsResp.ok) throw new Error('Ошибка загрузки бронирований');
 
-        const bookings = await response.json();
+        const bookings = await bookingsResp.json();
         container.innerHTML = renderBookingsHtml(bookings);
     } catch (e) {
-        console.error('Ошибка загрузки бронирований:', e);
-        container.innerHTML = '<div style="color: red;">Не удалось загрузить бронирования</div>';
+        console.error('Ошибка:', e);
+        container.innerHTML = `<div style="color: red;">Ошибка: ${e.message}</div>`;
     }
 }
 
@@ -281,6 +289,9 @@ function renderBookingsHtml(bookings) {
 	`;
 }
 
+// Глобальная переменная для хранения верифицированного email
+let verifiedEmail = null;
+
 let selectedSeats = [];
 let currentPerformanceId = null;
 
@@ -324,61 +335,284 @@ function updateBookingPanel() {
 
 async function proceedToBooking() {
     if (selectedSeats.length === 0) {
-        alert('Выберите хотя бы одно место');
+        showErrorModal('Выберите хотя бы одно место');
         return;
     }
 
-    const phone = prompt('Введите ваш номер телефона:');
-    if (!phone) return;
+    // Показываем форму с email, сразу отправляем код и запрашиваем его
+    showEmailCodeModal(async (email) => {
+        verifiedEmail = email; // Сохраняем верифицированный email
 
-    const name = prompt('Введите ваше имя:');
-    if (!name) return;
+        try {
+            const response = await fetch('/api/bookings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: email,
+                    name: email.split('@')[0], // Используем часть email как имя
+                    performance_id: currentPerformanceId,
+                    seat_ids: selectedSeats.map(s => s.id)
+                })
+            });
 
-    try {
-        const response = await fetch('/api/bookings', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                phone: phone,
-                name: name,
-                performance_id: currentPerformanceId,
-                seat_ids: selectedSeats.map(s => s.id)
-            })
-        });
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Ошибка бронирования');
+            }
 
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Ошибка бронирования');
+            const booking = await response.json();
+            showSuccessModal(
+                'Бронирование успешно создано!',
+                `Номер бронирования: ${booking.id}`,
+                () => {
+                    // Перенаправляем на бронирования (email уже сохранен)
+                    window.location.hash = '#bookings';
+                }
+            );
+        } catch (e) {
+            console.error('Ошибка бронирования:', e);
+            showErrorModal('Ошибка: ' + e.message);
         }
-
-        const booking = await response.json();
-        alert('Бронирование успешно создано!\nНомер бронирования: ' + booking.id);
-        window.location.hash = '#bookings';
-    } catch (e) {
-        console.error('Ошибка бронирования:', e);
-        alert('Ошибка: ' + e.message);
-    }
+    });
 }
 
 async function cancelBooking(bookingId) {
-    if (!confirm('Вы уверены, что хотите отменить бронирование?')) return;
+    showConfirmModal(
+        'Вы уверены, что хотите отменить бронирование?',
+        async () => {
+            try {
+                const response = await fetch(`/api/bookings/${bookingId}/cancel`, {
+                    method: 'PATCH'
+                });
 
-    try {
-        const response = await fetch(`/api/bookings/${bookingId}/cancel`, {
-            method: 'PATCH'
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Ошибка отмены');
+                }
+
+                showSuccessModal('Бронирование отменено', '', () => {
+                    showBookingsView();
+                });
+            } catch (e) {
+                console.error('Ошибка отмены:', e);
+                showErrorModal('Ошибка: ' + e.message);
+            }
+        }
+    );
+}
+
+// Модальные окна
+function createModal() {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+        <div class="modal">
+            <div class="modal-content"></div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Закрытие по клику на overlay
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal(modal);
+        }
+    });
+
+    return modal;
+}
+
+function closeModal(modal) {
+    if (modal && modal.parentNode) {
+        modal.remove();
+    }
+}
+
+function showErrorModal(message) {
+    const modal = createModal();
+    const content = modal.querySelector('.modal-content');
+    content.innerHTML = `
+        <h3 style="color: #e24a4a; margin-bottom: 16px;">Ошибка</h3>
+        <p style="margin-bottom: 24px;">${escapeHtml(message)}</p>
+        <button type="button" class="btn btn-primary" onclick="this.closest('.modal-overlay').remove()">
+            Закрыть
+        </button>
+    `;
+}
+
+function showSuccessModal(title, message, onClose) {
+    const modal = createModal();
+    const content = modal.querySelector('.modal-content');
+    content.innerHTML = `
+        <h3 style="color: #7fda7f; margin-bottom: 16px;">${escapeHtml(title)}</h3>
+        ${message ? `<p style="margin-bottom: 24px;">${escapeHtml(message)}</p>` : ''}
+        <button type="button" class="btn btn-primary" id="success-ok-btn">
+            OK
+        </button>
+    `;
+
+    content.querySelector('#success-ok-btn').addEventListener('click', () => {
+        closeModal(modal);
+        if (onClose) onClose();
+    });
+}
+
+function showConfirmModal(message, onConfirm) {
+    const modal = createModal();
+    const content = modal.querySelector('.modal-content');
+    content.innerHTML = `
+        <h3 style="margin-bottom: 16px;">Подтверждение</h3>
+        <p style="margin-bottom: 24px;">${escapeHtml(message)}</p>
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <button type="button" class="btn" id="cancel-btn">Отмена</button>
+            <button type="button" class="btn btn-cancel" id="confirm-btn">Подтвердить</button>
+        </div>
+    `;
+
+    content.querySelector('#cancel-btn').addEventListener('click', () => closeModal(modal));
+    content.querySelector('#confirm-btn').addEventListener('click', () => {
+        closeModal(modal);
+        if (onConfirm) onConfirm();
+    });
+}
+
+function showEmailCodeModal(onVerified) {
+    const modal = createModal();
+    const content = modal.querySelector('.modal-content');
+
+    // Шаг 1: Ввод email и отправка кода
+    const renderEmailStep = () => {
+        content.innerHTML = `
+            <h3 style="margin-bottom: 24px;">Введите email</h3>
+            <form id="email-form" style="display: flex; flex-direction: column; gap: 16px;">
+                <div>
+                    <input type="email" id="verify-email" required placeholder="your@email.com"
+                        style="width: 100%; padding: 12px; background: #1a1a1a; border: 1px solid #2a2a2a; 
+                        border-radius: 8px; color: #e0e0e0; font-size: 1rem;">
+                </div>
+                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 8px;">
+                    <button type="button" class="btn" id="cancel-verify-btn">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Продолжить</button>
+                </div>
+            </form>
+        `;
+
+        content.querySelector('#verify-email').focus();
+
+        content.querySelector('#cancel-verify-btn').addEventListener('click', () => {
+            closeModal(modal);
+            window.location.hash = '#list';
         });
 
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Ошибка отмены');
-        }
+        content.querySelector('#email-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = content.querySelector('#verify-email').value;
 
-        alert('Бронирование отменено');
-        showBookingsView();
-    } catch (e) {
-        console.error('Ошибка отмены:', e);
-        alert('Ошибка: ' + e.message);
-    }
+            content.innerHTML = '<p style="text-align: center;">Отправка кода...</p>';
+
+            try {
+                const response = await fetch('/api/auth/send-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                if (!response.ok) throw new Error('Ошибка отправки кода');
+
+                renderCodeStep(email);
+            } catch (e) {
+                showErrorModal('Ошибка отправки кода: ' + e.message);
+                closeModal(modal);
+            }
+        });
+    };
+
+    // Шаг 2: Ввод кода
+    const renderCodeStep = (email) => {
+        content.innerHTML = `
+            <h3 style="margin-bottom: 16px;">Введите код подтверждения</h3>
+            <p style="margin-bottom: 24px; color: #a0a0a0;">
+                Код отправлен на ${escapeHtml(email)}
+            </p>
+            <form id="code-form" style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="display: flex; gap: 8px; justify-content: center;">
+                    <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required
+                        style="width: 48px; height: 56px; text-align: center; font-size: 1.5rem; font-weight: 600;
+                        background: #1a1a1a; border: 2px solid #2a2a2a; border-radius: 8px; color: #e0e0e0;">
+                    <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required
+                        style="width: 48px; height: 56px; text-align: center; font-size: 1.5rem; font-weight: 600;
+                        background: #1a1a1a; border: 2px solid #2a2a2a; border-radius: 8px; color: #e0e0e0;">
+                    <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required
+                        style="width: 48px; height: 56px; text-align: center; font-size: 1.5rem; font-weight: 600;
+                        background: #1a1a1a; border: 2px solid #2a2a2a; border-radius: 8px; color: #e0e0e0;">
+                    <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required
+                        style="width: 48px; height: 56px; text-align: center; font-size: 1.5rem; font-weight: 600;
+                        background: #1a1a1a; border: 2px solid #2a2a2a; border-radius: 8px; color: #e0e0e0;">
+                    <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required
+                        style="width: 48px; height: 56px; text-align: center; font-size: 1.5rem; font-weight: 600;
+                        background: #1a1a1a; border: 2px solid #2a2a2a; border-radius: 8px; color: #e0e0e0;">
+                    <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required
+                        style="width: 48px; height: 56px; text-align: center; font-size: 1.5rem; font-weight: 600;
+                        background: #1a1a1a; border: 2px solid #2a2a2a; border-radius: 8px; color: #e0e0e0;">
+                </div>
+                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 8px;">
+                    <button type="button" class="btn" id="cancel-code-btn">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Подтвердить</button>
+                </div>
+            </form>
+        `;
+
+        // Автоматический переход между полями
+        const inputs = content.querySelectorAll('.code-input');
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+        });
+
+        inputs[0].focus();
+
+        content.querySelector('#cancel-code-btn').addEventListener('click', () => {
+            closeModal(modal);
+            window.location.hash = '#list';
+        });
+
+        content.querySelector('#code-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const code = Array.from(inputs).map(i => i.value).join('');
+
+            content.innerHTML = '<p style="text-align: center;">Проверка кода...</p>';
+
+            try {
+                const response = await fetch('/api/auth/verify-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, code })
+                });
+
+                if (!response.ok) throw new Error('Неверный код');
+
+                const result = await response.json();
+                if (!result.verified) throw new Error('Код не подтвержден');
+
+                closeModal(modal);
+                await onVerified(email);
+            } catch (e) {
+                showErrorModal('Ошибка проверки кода: ' + e.message);
+                closeModal(modal);
+            }
+        });
+    };
+
+    renderEmailStep();
 }
 
 function renderPerformanceBadges(performances) {
