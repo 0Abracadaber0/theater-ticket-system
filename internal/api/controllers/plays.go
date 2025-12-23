@@ -77,19 +77,21 @@ func (c *Plays) GetPlayByID(ctx *gin.Context) {
 // @Success 201 {object} response.Play
 // @Router /api/plays [post]
 func (c *Plays) CreatePlay(ctx *gin.Context) {
-	// todo отдавать на выход модель (чтобы был id и timestamps)
 	var req request.Play
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := c.service.CreatePlay(req.Model()); err != nil {
+	// ✅ ИСПРАВЛЕНО: создаём модель один раз и используем её
+	play := req.Model()
+	if err := c.service.CreatePlay(play); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, req.Model().Response())
+	// Теперь play имеет ID, установленный в сервисе
+	ctx.JSON(http.StatusCreated, play.Response())
 }
 
 // UpdatePlay godoc
@@ -103,7 +105,6 @@ func (c *Plays) CreatePlay(ctx *gin.Context) {
 // @Success 200 {object} response.Play
 // @Router /api/plays/{id} [put]
 func (c *Plays) UpdatePlay(ctx *gin.Context) {
-	// todo отдавать на выход модель (чтобы был id и timestamps)
 	id := ctx.Param("id")
 
 	var req request.Play
@@ -112,12 +113,15 @@ func (c *Plays) UpdatePlay(ctx *gin.Context) {
 		return
 	}
 
-	if err := c.service.UpdatePlay(id, req.Model()); err != nil {
+	// ✅ ИСПРАВЛЕНО: создаём модель один раз и используем её
+	play := req.Model()
+	if err := c.service.UpdatePlay(id, play); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, req.Model().Response())
+	// Теперь play имеет правильный ID и CreatedAt, установленные в сервисе
+	ctx.JSON(http.StatusOK, play.Response())
 }
 
 // DeletePlay godoc

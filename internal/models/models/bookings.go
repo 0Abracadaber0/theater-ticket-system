@@ -29,6 +29,7 @@ func (*Booking) TableName() string {
 	return "bookings"
 }
 
+// ОБНОВЛЕННЫЙ МЕТОД Response()
 func (b *Booking) Response() response.Booking {
 	seats := make([]response.PerformanceSeat, len(b.PerformanceSeats))
 	for i := range b.PerformanceSeats {
@@ -41,6 +42,7 @@ func (b *Booking) Response() response.Booking {
 		PerformanceID: b.PerformanceID,
 		TotalPrice:    b.TotalPrice,
 		Status:        b.Status,
+		SeatsCount:    len(b.PerformanceSeats),
 		ExpiresAt:     b.ExpiresAt,
 		CreatedAt:     b.CreatedAt,
 		UpdatedAt:     b.UpdatedAt,
