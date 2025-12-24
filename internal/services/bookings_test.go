@@ -2,12 +2,13 @@ package service
 
 import (
 	"errors"
+	"testing"
+	"theater-ticket-system/internal/models/models"
+
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"gorm.io/gorm"
-	"testing"
-	"theater-ticket-system/internal/models/models"
 )
 
 type MockBookingsRepository struct {
@@ -57,7 +58,7 @@ type MockUsersRepository struct {
 	mock.Mock
 }
 
-func (m *MockUsersRepository) FindByPhone(phone string) (*model.User, error) {
+func (m *MockUsersRepository) FindByEmail(phone string) (*model.User, error) {
 	args := m.Called(phone)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -93,7 +94,7 @@ func TestCreateBooking(t *testing.T) {
 
 		existingUser := &model.User{
 			ID:    userID,
-			Phone: "+1234567890",
+			Email: "+1234567890",
 			Name:  "John Doe",
 		}
 
@@ -110,7 +111,7 @@ func TestCreateBooking(t *testing.T) {
 			Status:        "pending",
 		}
 
-		mockUsersRepo.On("FindByPhone", "+1234567890").Return(existingUser, nil)
+		mockUsersRepo.On("FindByEmail", "+1234567890").Return(existingUser, nil)
 		mockBookingsRepo.On("GetPerformanceSeatsByIDs", seatIDs, performanceID).
 			Return(availableSeats, nil)
 		mockBookingsRepo.On("Create", mock.AnythingOfType("*model.Booking")).Return(nil)
@@ -142,9 +143,9 @@ func TestCreateBooking(t *testing.T) {
 			{ID: seatIDs[0], Price: 1500, Status: "available"},
 		}
 
-		mockUsersRepo.On("FindByPhone", "+9876543210").Return(nil, gorm.ErrRecordNotFound)
+		mockUsersRepo.On("FindByEmail", "+9876543210").Return(nil, gorm.ErrRecordNotFound)
 		mockUsersRepo.On("Create", mock.MatchedBy(func(u *model.User) bool {
-			return u.Phone == "+9876543210" && u.Name == "Jane Doe"
+			return u.Email == "+9876543210" && u.Name == "Jane Doe"
 		})).Return(nil)
 		mockBookingsRepo.On("GetPerformanceSeatsByIDs", seatIDs, performanceID).
 			Return(availableSeats, nil)
@@ -172,7 +173,7 @@ func TestCreateBooking(t *testing.T) {
 		assert.Error(t, err)
 		assert.Nil(t, booking)
 		assert.EqualError(t, err, "at least one seat must be selected")
-		mockUsersRepo.AssertNotCalled(t, "FindByPhone")
+		mockUsersRepo.AssertNotCalled(t, "FindByEmail")
 		mockBookingsRepo.AssertNotCalled(t, "Create")
 	})
 
@@ -185,13 +186,13 @@ func TestCreateBooking(t *testing.T) {
 		performanceID := uuid.New()
 		seatIDs := []uuid.UUID{uuid.New(), uuid.New(), uuid.New()}
 
-		existingUser := &model.User{ID: userID, Phone: "+1234567890"}
+		existingUser := &model.User{ID: userID, Email: "+1234567890"}
 
 		availableSeats := []model.PerformanceSeat{
 			{ID: seatIDs[0], Price: 1500, Status: "available"},
 		}
 
-		mockUsersRepo.On("FindByPhone", "+1234567890").Return(existingUser, nil)
+		mockUsersRepo.On("FindByEmail", "+1234567890").Return(existingUser, nil)
 		mockBookingsRepo.On("GetPerformanceSeatsByIDs", seatIDs, performanceID).
 			Return(availableSeats, nil)
 
@@ -208,7 +209,7 @@ func TestCreateBooking(t *testing.T) {
 		mockUsersRepo := new(MockUsersRepository)
 		service := NewBookings(mockBookingsRepo, mockUsersRepo)
 
-		mockUsersRepo.On("FindByPhone", "+1234567890").Return(nil, gorm.ErrRecordNotFound)
+		mockUsersRepo.On("FindByEmail", "+1234567890").Return(nil, gorm.ErrRecordNotFound)
 		mockUsersRepo.On("Create", mock.AnythingOfType("*model.User")).
 			Return(errors.New("database error"))
 
@@ -280,14 +281,14 @@ func TestGetUserBookings(t *testing.T) {
 		service := NewBookings(mockBookingsRepo, mockUsersRepo)
 
 		userID := uuid.New()
-		user := &model.User{ID: userID, Phone: "+1234567890"}
+		user := &model.User{ID: userID, Email: "+1234567890"}
 
 		expectedBookings := []model.Booking{
 			{ID: uuid.New(), UserID: userID, TotalPrice: 1500},
 			{ID: uuid.New(), UserID: userID, TotalPrice: 2000},
 		}
 
-		mockUsersRepo.On("FindByPhone", "+1234567890").Return(user, nil)
+		mockUsersRepo.On("FindByEmail", "+1234567890").Return(user, nil)
 		mockBookingsRepo.On("GetByUserID", userID).Return(expectedBookings, nil)
 
 		bookings, err := service.GetUserBookings("+1234567890")
@@ -308,8 +309,8 @@ func TestGetUserBookings(t *testing.T) {
 
 		assert.Error(t, err)
 		assert.Nil(t, bookings)
-		assert.EqualError(t, err, "phone is required")
-		mockUsersRepo.AssertNotCalled(t, "FindByPhone")
+		assert.EqualError(t, err, "email is required")
+		mockUsersRepo.AssertNotCalled(t, "FindByEmail")
 	})
 
 	t.Run("user not found", func(t *testing.T) {
@@ -317,7 +318,7 @@ func TestGetUserBookings(t *testing.T) {
 		mockUsersRepo := new(MockUsersRepository)
 		service := NewBookings(mockBookingsRepo, mockUsersRepo)
 
-		mockUsersRepo.On("FindByPhone", "+1234567890").Return(nil, gorm.ErrRecordNotFound)
+		mockUsersRepo.On("FindByEmail", "+1234567890").Return(nil, gorm.ErrRecordNotFound)
 
 		bookings, err := service.GetUserBookings("+1234567890")
 

@@ -12,6 +12,7 @@ type Booking struct {
 	PerformanceID uuid.UUID         `json:"performance_id" binding:"required"`
 	TotalPrice    int               `json:"total_price" binding:"required"`
 	Status        string            `json:"status" binding:"required"` // pending, confirmed, cancelled
+	SeatsCount    int               `json:"seats_count" binding:"required"`
 	ExpiresAt     time.Time         `json:"expires_at" binding:"required"`
 	CreatedAt     time.Time         `json:"created_at" binding:"required"`
 	UpdatedAt     time.Time         `json:"updated_at" binding:"required"`

@@ -32,7 +32,9 @@ func (r *Plays) GetByID(id uuid.UUID) (*model.Play, error) {
 }
 
 func (r *Plays) Create(play *model.Play) error {
-	play.ID = uuid.New()
+	if play.ID == uuid.Nil {
+		play.ID = uuid.New()
+	}
 	return r.db.Create(play).Error
 }
 

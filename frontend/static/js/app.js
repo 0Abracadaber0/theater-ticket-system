@@ -261,7 +261,6 @@ function renderBookingsHtml(bookings) {
         const perfDate = booking.performance
             ? formatDateTimeRu(booking.performance.date)
             : '';
-        const seatsCount = booking.seats ? booking.seats.length : 0;
         const statusClass = `status-${booking.status}`;
 
         return `
@@ -271,7 +270,6 @@ function renderBookingsHtml(bookings) {
 					<span class="status-badge ${statusClass}">${escapeHtml(booking.status)}</span>
 				</div>
 				<p class="booking-date">${perfDate}</p>
-				<p>Мест: ${seatsCount}</p>
 				<p class="booking-price">Сумма: ${booking.total_price} руб.</p>
 				${booking.status === 'pending' ? `
 					<button type="button" class="btn btn-cancel" onclick="cancelBooking('${booking.id}')">
@@ -444,7 +442,7 @@ function showSuccessModal(title, message, onClose) {
     const modal = createModal();
     const content = modal.querySelector('.modal-content');
     content.innerHTML = `
-        <h3 style="color: #7fda7f; margin-bottom: 16px;">${escapeHtml(title)}</h3>
+        <h3 style="color: #28a745; margin-bottom: 16px;">${escapeHtml(title)}</h3>
         ${message ? `<p style="margin-bottom: 24px;">${escapeHtml(message)}</p>` : ''}
         <button type="button" class="btn btn-primary" id="success-ok-btn">
             OK
@@ -487,8 +485,8 @@ function showEmailCodeModal(onVerified) {
             <form id="email-form" style="display: flex; flex-direction: column; gap: 16px;">
                 <div>
                     <input type="email" id="verify-email" required placeholder="your@email.com"
-                        style="width: 100%; padding: 12px; background: #1a1a1a; border: 1px solid #2a2a2a; 
-                        border-radius: 8px; color: #e0e0e0; font-size: 1rem;">
+                        style="width: 100%; padding: 12px; background: #ffffff; border: 1px solid #d0d0d0; 
+                        border-radius: 8px; color: #2c2c2c; font-size: 1rem;">
                 </div>
                 <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 8px;">
                     <button type="button" class="btn" id="cancel-verify-btn">Отмена</button>
@@ -531,29 +529,29 @@ function showEmailCodeModal(onVerified) {
     const renderCodeStep = (email) => {
         content.innerHTML = `
             <h3 style="margin-bottom: 16px;">Введите код подтверждения</h3>
-            <p style="margin-bottom: 24px; color: #a0a0a0;">
+            <p style="margin-bottom: 24px; color: #5a5a5a;">
                 Код отправлен на ${escapeHtml(email)}
             </p>
             <form id="code-form" style="display: flex; flex-direction: column; gap: 16px;">
                 <div style="display: flex; gap: 8px; justify-content: center;">
                     <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required
                         style="width: 48px; height: 56px; text-align: center; font-size: 1.5rem; font-weight: 600;
-                        background: #1a1a1a; border: 2px solid #2a2a2a; border-radius: 8px; color: #e0e0e0;">
+                        background: #ffffff; border: 2px solid #d0d0d0; border-radius: 8px; color: #2c2c2c;">
                     <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required
                         style="width: 48px; height: 56px; text-align: center; font-size: 1.5rem; font-weight: 600;
-                        background: #1a1a1a; border: 2px solid #2a2a2a; border-radius: 8px; color: #e0e0e0;">
+                        background: #ffffff; border: 2px solid #d0d0d0; border-radius: 8px; color: #2c2c2c;">
                     <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required
                         style="width: 48px; height: 56px; text-align: center; font-size: 1.5rem; font-weight: 600;
-                        background: #1a1a1a; border: 2px solid #2a2a2a; border-radius: 8px; color: #e0e0e0;">
+                        background: #ffffff; border: 2px solid #d0d0d0; border-radius: 8px; color: #2c2c2c;">
                     <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required
                         style="width: 48px; height: 56px; text-align: center; font-size: 1.5rem; font-weight: 600;
-                        background: #1a1a1a; border: 2px solid #2a2a2a; border-radius: 8px; color: #e0e0e0;">
+                        background: #ffffff; border: 2px solid #d0d0d0; border-radius: 8px; color: #2c2c2c;">
                     <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required
                         style="width: 48px; height: 56px; text-align: center; font-size: 1.5rem; font-weight: 600;
-                        background: #1a1a1a; border: 2px solid #2a2a2a; border-radius: 8px; color: #e0e0e0;">
+                        background: #ffffff; border: 2px solid #d0d0d0; border-radius: 8px; color: #2c2c2c;">
                     <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required
                         style="width: 48px; height: 56px; text-align: center; font-size: 1.5rem; font-weight: 600;
-                        background: #1a1a1a; border: 2px solid #2a2a2a; border-radius: 8px; color: #e0e0e0;">
+                        background: #ffffff; border: 2px solid #d0d0d0; border-radius: 8px; color: #2c2c2c;">
                 </div>
                 <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 8px;">
                     <button type="button" class="btn" id="cancel-code-btn">Отмена</button>
